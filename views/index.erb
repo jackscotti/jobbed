@@ -7,5 +7,21 @@
 </head>
 
 <body>
-	<p><%= @var %></p>
+	<p>Total results: <%= total_results %>
+	<% while counter < total_results %>
+
+ 	
+ 	<p>Job Title: <%= jobTitles[counter] %></p>
+ 	<p>Job ID: <%= jobIds[counter] %></p>
+ 	<p>Min salary: <%= minimumSalarys[counter] %></p>
+	<p>Max salary: <%= maximumSalarys[counter] %></p>
+	
+ 	<p>Job Description: <%= jobDescriptions[counter] %></p>
+	<p>Employer Name: <%= employerNames[counter] %></p>
+	
+
+	<% counter += 1 %>
+	<% end %>
 </body>
+
+
