@@ -2,13 +2,19 @@ require 'sinatra'
 require 'net/http'
 require 'json'
 
-set :port, 8080
+set :port, 8180
+set :static, true
+set :public_folder, "static"
+set :views, "views"
 
 @url
 @total_results
 
-
 get '/' do
+  erb :input_page
+end
+
+post '/' do
 	counter = 0
 
 	create_url()
@@ -28,13 +34,16 @@ get '/' do
 		counter: counter
 	}
 end
-
 		
+
 def create_url
 	@api_key = "4f87ebd0-0e8a-45a8-8ab9-d4c443f13405"
-	@keywords = "ruby"
-	@location = "london"
-	@url = "http://www.reed.co.uk/api/1.0/search?keywords=" + @keywords
+
+	#input from get
+	@keywords = params[:keywords]
+  @location = params[:location] || ""
+
+	@url = "http://www.reed.co.uk/api/1.0/search?keywords=#{@keywords}"
 	@url = @url + "&locationName=#{@location}"
 end
 
