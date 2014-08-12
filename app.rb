@@ -7,22 +7,39 @@ set :static, true
 set :public_folder, "static"
 set :views, "views"
 
-@url
-@total_results
-
-
 get '/' do
   erb :input_page
 end
 
 post '/' do
 	counter = 0
-	key = "4f87ebd0-0e8a-45a8-8ab9-d4c443f13405"
-	#input from get
-	url = create_url(params[:keywords], params[:location])
+	@url = create_url(params[:keywords], params[:location])
 
-	api_result_array_of_hash = query_result(url, key)
-	create_data_arrays(api_result_array_of_hash)
+	@array_of_ids = []
+	@local_result_array = []
+	@key = "4f87ebd0-0e8a-45a8-8ab9-d4c443f13405"
+	@total_results
+	@page_counter = 0
+	@jobIds = []
+	@employerNames = []
+	@jobTitles = []
+	@minimumSalarys = []
+	@maximumSalarys = []
+	@expirationDates = []
+	@jobDescriptions = []
+
+
+# - query api providing url
+	api_query(@url)
+# - count total results from api
+  count_total_results()
+# - update local array
+  update_local_temp_array()
+# - check the number of results, update if needed
+  check_number_of_results() # to be refactored into more specific methods
+# - Add each separate id to the relevant array
+	create_data_arrays()
+
 
 	erb :index, locals: {
 
@@ -34,55 +51,81 @@ post '/' do
 		expirationDates: @expirationDates,
 		jobDescriptions: @jobDescriptions,
 		total_results: @total_results,
+		total_ids: @array_of_ids.count,
 		counter: counter
 	}
 end
 		
-
 def create_url(keywords,location)
 	url = "http://www.reed.co.uk/api/1.0/search?"
 	url << "keywords=" << keywords
-	url << "&locationName" << location
+	url << "&locationName=" << location
 	url
 end
 
-def api_query(url, key)
+def api_query(url)
   uri = URI.parse(url) #to test content and if uri object
   puts "loading"
   http = Net::HTTP.new(uri.host, uri.port)
   request = Net::HTTP::Get.new(uri.request_uri)
   # basic authorization with api key as username and no password
-  request.basic_auth(key, "")
+  request.basic_auth("4f87ebd0-0e8a-45a8-8ab9-d4c443f13405", "")
   response = http.request(request)
   puts "ended loading"
-  # Main array
-  result = JSON.parse(response.body)
+  result = JSON.parse(response.body) # this will crash everytime response.body is nil
+  @first_hash_result_from_api = result
 end
 
-def query_result(url, key)
-  query_result = api_query(url, key)
-  # query_result array from results hash
-  query_result = query_result["results"]
-  query_result
+def count_total_results
+  @total_results = @first_hash_result_from_api['totalResults']
 end
 
-def create_data_arrays(array_of_hashes)
-	@jobIds = []
-	@employerNames = []
-	@jobTitles = []
-	@minimumSalarys = []
-	@maximumSalarys = []
-	@expirationDates = []
-	@jobDescriptions = []
+def update_local_temp_array
+  @local_temp_array = @first_hash_result_from_api["results"]
+end
 
-	array_of_hashes.each do |jobs|
-		@jobIds << jobs["jobId"]
-		@employerNames << jobs["employerName"]
-		@jobTitles << jobs["jobTitle"]
-		@minimumSalarys << jobs["minimumSalary"]
-		@maximumSalarys << jobs["maximumSalary"]
-		@expirationDates << jobs["expirationDate"]
-		@jobDescriptions << jobs["jobDescription"]
+def update_array_of_ids
+  @local_temp_array.each do |result|
+    @array_of_ids << result['jobId']
+  end
+  @array_of_ids.uniq! 
+end
+
+
+def check_number_of_results
+  while (@array_of_ids.count < @total_results - 10) # do not know why (error in the api?)
+    puts @array_of_ids.count.to_s
+    @local_temp_array.each do |result|
+      if !@array_of_ids.include?(result['jobId'])
+        @local_result_array << result
+      end
+    end
+    # add the job ids to the array of ids deleting repetitions
+    update_array_of_ids()
+
+    @page_counter += 100
+    if @array_of_ids.count < 200
+    	@url << "&resultsToSkip="
+    elsif @array_of_ids.count >= 200 and @array_of_ids.count < 1000
+      @url = @url[0..-4] 
+    else
+      @url = @url[0..-5] 
+    end
+    @url  << @page_counter.to_s
+    
+    api_query(@url)
+    update_local_temp_array()
+  end
+end
+
+def create_data_arrays
+	@local_result_array.each do |job|
+		@jobIds << job["jobId"]
+		@employerNames << job["employerName"]
+		@jobTitles << job["jobTitle"]
+		@minimumSalarys << job["minimumSalary"]
+		@maximumSalarys << job["maximumSalary"]
+		@expirationDates << job["expirationDate"]
+		@jobDescriptions << job["jobDescription"]
 	end
-	@total_results = array_of_hashes.count
 end
