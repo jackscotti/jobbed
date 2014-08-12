@@ -10,15 +10,18 @@ set :views, "views"
 @url
 @total_results
 
+
 get '/' do
   erb :input_page
 end
 
 post '/' do
 	counter = 0
+	key = "4f87ebd0-0e8a-45a8-8ab9-d4c443f13405"
+	#input from get
+	url = create_url(params[:keywords], params[:location])
 
-	create_url()
-	api_result_array_of_hash = query_result()
+	api_result_array_of_hash = query_result(url, key)
 	create_data_arrays(api_result_array_of_hash)
 
 	erb :index, locals: {
@@ -36,32 +39,28 @@ post '/' do
 end
 		
 
-def create_url
-	@api_key = "4f87ebd0-0e8a-45a8-8ab9-d4c443f13405"
-
-	#input from get
-	@keywords = params[:keywords]
-  @location = params[:location] || ""
-
-	@url = "http://www.reed.co.uk/api/1.0/search?keywords=#{@keywords}"
-	@url = @url + "&locationName=#{@location}"
+def create_url(keywords,location)
+	url = "http://www.reed.co.uk/api/1.0/search?"
+	url << "keywords=" << keywords
+	url << "&locationName" << location
+	url
 end
 
-def api_query
-  uri = URI.parse(@url) #to test content and if uri object
+def api_query(url, key)
+  uri = URI.parse(url) #to test content and if uri object
   puts "loading"
   http = Net::HTTP.new(uri.host, uri.port)
   request = Net::HTTP::Get.new(uri.request_uri)
   # basic authorization with api key as username and no password
-  request.basic_auth(@api_key, "")
+  request.basic_auth(key, "")
   response = http.request(request)
   puts "ended loading"
   # Main array
   result = JSON.parse(response.body)
 end
 
-def query_result
-  query_result = api_query()
+def query_result(url, key)
+  query_result = api_query(url, key)
   # query_result array from results hash
   query_result = query_result["results"]
   query_result
