@@ -15,7 +15,7 @@ post '/' do
 	counter = 0
 	@url = create_url(params[:keywords], params[:location])
 	@array_of_ids = []
-	@local_result_array = []
+	@local_result_hash = []
 	@key = "4f87ebd0-0e8a-45a8-8ab9-d4c443f13405"
 	@total_results
 	@page_counter = 0
@@ -26,7 +26,7 @@ post '/' do
 	@maximumSalarys = []
 	@expirationDates = []
 	@jobDescriptions = []
-
+	@api_parameters = ["jobId", "employerName", "jobTitle", "minimumSalary", "maximumSalary", "expirationDate", "jobDescription"]
 
 # - query api providing url
 	api_query(@url)
@@ -104,7 +104,7 @@ end
 def add_new_jobs
 	@local_temp_array.each do |result|
     unless @array_of_ids.include?(result['jobId'])
-      @local_result_array << result
+      @local_result_hash << result
     end
   end
 end
@@ -122,13 +122,9 @@ def adjust_url
 end
 
 def create_data_arrays
-	@local_result_array.each do |job|
-		@jobIds << job["jobId"]
-		@employerNames << job["employerName"]
-		@jobTitles << job["jobTitle"]
-		@minimumSalarys << job["minimumSalary"]
-		@maximumSalarys << job["maximumSalary"]
-		@expirationDates << job["expirationDate"]
-		@jobDescriptions << job["jobDescription"]
-	end
+  @local_result_hash.each do |job|
+    @api_parameters.each do |parameter|
+      instance_variable_get("@#{parameter}s") << job[parameter]
+    end
+  end
 end

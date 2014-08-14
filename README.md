@@ -37,7 +37,7 @@ To do/fix:
 
 In progress:
 - simplify methods
-- refactoring
+- refactor
 
 Done:
 - query through each api result updating the url
