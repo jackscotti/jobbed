@@ -29,8 +29,6 @@ To do/fix:
 - make it look pretty
 - rename methods and variables
 - remove/add/reword comments where needed
-- check if user inputs more than one word
-	- format spaces into '-'
 - add "Download CSV file" button
 	- make CSV file downloadable
 - if salary is not specified show 'salary not specified'
@@ -44,5 +42,7 @@ Done:
 	- permit only one unique instance of each job
 	- update the url when <1000 and >1000 total results
 - rename app.rb to jobbed.rb
+- check if user inputs more than one word
+	- format spaces into '-'
 
 

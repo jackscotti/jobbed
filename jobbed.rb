@@ -13,20 +13,27 @@ end
 
 post '/' do
 	counter = 0
-	@url = create_url(params[:keywords], params[:location])
-	@array_of_ids = []
-	@local_result_hash = []
-	@key = "4f87ebd0-0e8a-45a8-8ab9-d4c443f13405"
-	@total_results
-	@page_counter = 0
+	@url = create_url(format_user_input())
+
+	@array_of_ids, @local_result_hash = [], []
 	@jobIds = []
 	@employerNames = []
 	@jobTitles = []
-	@minimumSalarys = []
-	@maximumSalarys = []
+	@minimumSalarys, @maximumSalarys = [], []
 	@expirationDates = []
 	@jobDescriptions = []
-	@api_parameters = ["jobId", "employerName", "jobTitle", "minimumSalary", "maximumSalary", "expirationDate", "jobDescription"]
+
+	@api_parameters = ["jobId",
+										 "employerName",
+										 "jobTitle",
+										 "minimumSalary",
+										 "maximumSalary",
+										 "expirationDate",
+										 "jobDescription"]
+
+	@key = "4f87ebd0-0e8a-45a8-8ab9-d4c443f13405"
+	@total_results
+	@page_counter = 0
 
 # - query api providing url
 	api_query(@url)
@@ -38,7 +45,6 @@ post '/' do
   check_number_of_results() # to be refactored into more specific methods
 # - Add each separate id to the relevant array
 	create_data_arrays()
-
 
 	erb :index, locals: {
 
@@ -54,8 +60,21 @@ post '/' do
 		counter: counter
 	}
 end
+
+
+def remove_spaces(input)
+  input = input.split(" ").join("+");
+  input
+end
+
+def format_user_input()
+	keywords = remove_spaces(params[:keywords])
+	location = remove_spaces(params[:location])
+	return keywords, location
+end
 		
-def create_url(keywords,location)
+def create_url(input)
+	keywords, location = input
 	url = "http://www.reed.co.uk/api/1.0/search?"
 	url << "keywords=" << keywords
 	url << "&locationName=" << location
