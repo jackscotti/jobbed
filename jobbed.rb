@@ -2,7 +2,7 @@ require 'sinatra'
 require 'net/http'
 require 'json'
 
-set :port, 8180
+set :port, 8600
 set :static, true
 set :public_folder, "static"
 set :views, "views"
