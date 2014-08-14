@@ -14,7 +14,6 @@ end
 post '/' do
 	counter = 0
 	@url = create_url(params[:keywords], params[:location])
-
 	@array_of_ids = []
 	@local_result_array = []
 	@key = "4f87ebd0-0e8a-45a8-8ab9-d4c443f13405"
@@ -94,28 +93,32 @@ end
 
 def check_number_of_results
   while (@array_of_ids.count < @total_results - 10) # do not know why (error in the api?)
-    puts @array_of_ids.count.to_s
-    @local_temp_array.each do |result|
-      if !@array_of_ids.include?(result['jobId'])
-        @local_result_array << result
-      end
-    end
-    # add the job ids to the array of ids deleting repetitions
+    add_new_jobs()
     update_array_of_ids()
-
-    @page_counter += 100
-    if @array_of_ids.count < 200
-    	@url << "&resultsToSkip="
-    elsif @array_of_ids.count >= 200 and @array_of_ids.count < 1000
-      @url = @url[0..-4] 
-    else
-      @url = @url[0..-5] 
-    end
-    @url  << @page_counter.to_s
-    
+    adjust_url()
     api_query(@url)
     update_local_temp_array()
   end
+end
+
+def add_new_jobs
+	@local_temp_array.each do |result|
+    unless @array_of_ids.include?(result['jobId'])
+      @local_result_array << result
+    end
+  end
+end
+
+def adjust_url
+	@page_counter += 100
+  if @array_of_ids.count < 200
+  	@url << "&resultsToSkip="
+  elsif @array_of_ids.count < 1000
+    @url = @url[0..-4] 
+  else
+    @url = @url[0..-5] 
+  end
+  @url << @page_counter.to_s
 end
 
 def create_data_arrays
