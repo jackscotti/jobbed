@@ -61,6 +61,12 @@ post '/' do
 	}
 end
 
+get '/:jobId' do
+  # link in view that links to /jobid 
+	# then all the methods will query the api and show relevant data
+  "Hello #{params[:jobId]}!"
+  erb :job_description, locals: {}
+end
 
 def remove_spaces(input)
   input = input.split(" ").join("+");

@@ -22,7 +22,7 @@ Reed API keys:
 
 To do/fix:
 
-- number of jobs from query and number of jobs shown by the app not matching
+- fix number of jobs from query and number of jobs shown by the app not matching
 - result = JSON.parse(response.body) makes app crash if response is nil
 - convert if possible all the instance variables to local variables
 - add test coverage
@@ -32,10 +32,12 @@ To do/fix:
 - add "Download CSV file" button
 	- make CSV file downloadable
 - if salary is not specified show 'salary not specified'
+- create error pages (404, etc.)
 
 In progress:
 - simplify methods
 - refactor
+- add job description page
 
 Done:
 - query through each api result updating the url
