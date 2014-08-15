@@ -13,7 +13,6 @@ end
 
 post '/' do
 	counter = 0
-	@url = create_url(format_user_input())
 
 	@array_of_ids, @local_result_hash = [], []
 	@jobIds = []
@@ -35,8 +34,18 @@ post '/' do
 	@total_results
 	@page_counter = 0
 
+
+	@url = create_url(format_user_input())
+
+
 # - query api providing url
-	api_query(@url)
+
+#old
+	# api_query(@url)
+# new 
+	@first_hash_result_from_api = api_query(@url)
+
+
 # - count total results from api
   count_total_results()
 # - update local array
@@ -79,6 +88,8 @@ def format_user_input()
 	return keywords, location
 end
 		
+
+# general query
 def create_url(input)
 	keywords, location = input
 	url = "http://www.reed.co.uk/api/1.0/search?"
@@ -86,9 +97,13 @@ def create_url(input)
 	url << "&locationName=" << location
 	url
 end
+# description query
+def create_url_desc
+	"http://www.reed.co.uk/api/1.0/jobs/" + params[:jobId]
+end
 
 def api_query(url)
-  uri = URI.parse(url) #to test content and if uri object
+  uri = URI.parse(url) #test content if !uri object app will crash
   puts "loading"
   http = Net::HTTP.new(uri.host, uri.port)
   request = Net::HTTP::Get.new(uri.request_uri)
@@ -96,8 +111,8 @@ def api_query(url)
   request.basic_auth("4f87ebd0-0e8a-45a8-8ab9-d4c443f13405", "")
   response = http.request(request)
   puts "ended loading"
-  result = JSON.parse(response.body) # this will crash everytime response.body is nil
-  @first_hash_result_from_api = result
+  parsed_response = JSON.parse(response.body) # this will crash everytime response.body is nil
+  parsed_response
 end
 
 def count_total_results
@@ -115,13 +130,12 @@ def update_array_of_ids
   @array_of_ids.uniq! 
 end
 
-
 def check_number_of_results
   while (@array_of_ids.count < @total_results - 10) # do not know why (error in the api?)
     add_new_jobs()
     update_array_of_ids()
     adjust_url()
-    api_query(@url)
+    @first_hash_result_from_api = api_query(@url)
     update_local_temp_array()
   end
 end
