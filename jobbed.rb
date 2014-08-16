@@ -13,7 +13,8 @@ end
 
 post '/' do
 	counter = 0
-
+	@page_counter = 0
+	@total_results
 	@array_of_ids, @local_result_hash = [], []
 	@jobIds = []
 	@employerNames = []
@@ -30,21 +31,8 @@ post '/' do
 										 "expirationDate",
 										 "jobDescription"]
 
-	@key = "4f87ebd0-0e8a-45a8-8ab9-d4c443f13405"
-	@total_results
-	@page_counter = 0
-
-
 	@url = create_url(format_user_input())
-
-
-# - query api providing url
-
-#old
-	# api_query(@url)
-# new 
 	@first_hash_result_from_api = api_query(@url)
-
 
 # - count total results from api
   count_total_results()
@@ -70,38 +58,48 @@ post '/' do
 	}
 end
 
-get '/:jobId' do
-  # link in view that links to /jobid 
-	# then all the methods will query the api and show relevant data
-  "Hello #{params[:jobId]}!"
-  erb :job_description, locals: {}
+get '/:id' do
+  @jobId = []
+	@employerName = []
+	@jobTitle = []
+	@minimumSalary, @maximumSalary = [], []
+	@expirationDate = []
+	@jobDescription = []
+	@api_parameters = ["jobId",
+										 "employerName",
+										 "jobTitle",
+										 "minimumSalary",
+										 "maximumSalary",
+										 "expirationDate",
+										 "jobDescription"]
+
+  url = create_url_desc()
+  parsed_response = api_query(url)
+ 	prepare_data(parsed_response)
+
+  erb :job_description, locals: {
+  	jobId: @jobId,
+		employerName: @employerName,
+		jobTitle: @jobTitle,
+		minimumSalary: @minimumSalary,
+		maximumSalary: @maximumSalary,
+		expirationDate: @expirationDate,
+		jobDescription: @jobDescription
+	}
 end
 
-def remove_spaces(input)
-  input = input.split(" ").join("+");
-  input
-end
-
-def format_user_input()
-	keywords = remove_spaces(params[:keywords])
-	location = remove_spaces(params[:location])
-	return keywords, location
-end
-		
-
-# general query
-def create_url(input)
-	keywords, location = input
-	url = "http://www.reed.co.uk/api/1.0/search?"
-	url << "keywords=" << keywords
-	url << "&locationName=" << location
-	url
-end
 # description query
 def create_url_desc
-	"http://www.reed.co.uk/api/1.0/jobs/" + params[:jobId]
+	url = "http://www.reed.co.uk/api/1.0/jobs/" + params[:id]
+	url 
+end
+def prepare_data(parsed_response)
+	@api_parameters.each do |parameter|
+    instance_variable_get("@#{parameter}") << parsed_response[parameter]
+  end
 end
 
+# shared methods
 def api_query(url)
   uri = URI.parse(url) #test content if !uri object app will crash
   puts "loading"
@@ -115,21 +113,35 @@ def api_query(url)
   parsed_response
 end
 
+# general query methods
+def remove_spaces(input)
+  input = input.split(" ").join("+");
+  input
+end
+def format_user_input()
+	keywords = remove_spaces(params[:keywords])
+	location = remove_spaces(params[:location])
+	return keywords, location
+end
+def create_url(input)
+	keywords, location = input
+	url = "http://www.reed.co.uk/api/1.0/search?"
+	url << "keywords=" << keywords
+	url << "&locationName=" << location
+	url
+end
 def count_total_results
   @total_results = @first_hash_result_from_api['totalResults']
 end
-
 def update_local_temp_array
   @local_temp_array = @first_hash_result_from_api["results"]
 end
-
 def update_array_of_ids
   @local_temp_array.each do |result|
     @array_of_ids << result['jobId']
   end
   @array_of_ids.uniq! 
 end
-
 def check_number_of_results
   while (@array_of_ids.count < @total_results - 10) # do not know why (error in the api?)
     add_new_jobs()
@@ -139,7 +151,6 @@ def check_number_of_results
     update_local_temp_array()
   end
 end
-
 def add_new_jobs
 	@local_temp_array.each do |result|
     unless @array_of_ids.include?(result['jobId'])
@@ -147,7 +158,6 @@ def add_new_jobs
     end
   end
 end
-
 def adjust_url
 	@page_counter += 100
   if @array_of_ids.count < 200
@@ -159,7 +169,6 @@ def adjust_url
   end
   @url << @page_counter.to_s
 end
-
 def create_data_arrays
   @local_result_hash.each do |job|
     @api_parameters.each do |parameter|

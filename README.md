@@ -1,8 +1,7 @@
 jobbed
 ================
 
-Reed API keys: 
-
+Reed Search API parameters: 
 - jobId
 - employerId
 - employerName
@@ -17,6 +16,28 @@ Reed API keys:
 - date
 - jobDescription
 - applications
+
+Reed Details API parameters: 
+- employerId
+- employerName
+- jobId
+- jobTitle
+- locationName
+- minimumSalary
+- maximumSalary
+- yearlyMinimumSalary
+- yearlyMaximumSalary
+- currency
+- salaryType
+- datePosted
+- expirationDate
+- externalUrl
+- jobUrl
+- partTime
+- fullTime
+- contractType
+- jobDescription
+- applicationCount
 
 ================
 
@@ -33,6 +54,9 @@ To do/fix:
 	- make CSV file downloadable
 - if salary is not specified show 'salary not specified'
 - create error pages (404, etc.)
+- divide main file into classes
+- format data returned by Reed Details API (remove [ and ])
+- wire index.erb to job_description.erb
 
 In progress:
 - simplify methods
@@ -40,11 +64,15 @@ In progress:
 - add job description page
 
 Done:
-- query through each api result updating the url
-	- permit only one unique instance of each job
-	- update the url when <1000 and >1000 total results
+- query Reed Search API
+	- query through each api result updating the url
+		- permit only one unique instance of each job
+		- update the url when <1000 and >1000 total results
 - rename app.rb to jobbed.rb
 - check if user inputs more than one word
 	- format spaces into '-'
+- query Reed Details API
+
+
 
 
