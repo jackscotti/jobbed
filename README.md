@@ -55,8 +55,8 @@ To do/fix:
 - if salary is not specified show 'salary not specified'
 - create error pages (404, etc.)
 - divide main file into classes
-- format data returned by Reed Details API (remove [ and ])
 - add 'back' link to details page
+- fix json parse console error
 
 In progress:
 - simplify methods
@@ -75,6 +75,7 @@ Done:
 - wire index.erb to job_description.erb
 - add helpers.rb
 	- add link_to helper
+- format data returned by Reed Details API (remove [ and ]) -- error caused by app code, no format needed
 
 
 
