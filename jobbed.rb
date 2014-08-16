@@ -4,7 +4,7 @@ require 'json'
 
 require './helpers/helpers'
 
-set :port, 8600
+set :port, 8699
 set :static, true
 set :public_folder, "static"
 set :views, "views"
@@ -17,7 +17,7 @@ post '/' do
 	counter = 0
 	@page_counter = 0
 	@total_results
-	@array_of_ids, @local_result_hash = [], []
+	@ids, @local_result_hash = [], []
 	@jobIds = []
 	@employerNames = []
 	@jobTitles = []
@@ -55,50 +55,39 @@ post '/' do
 		expirationDates: @expirationDates,
 		jobDescriptions: @jobDescriptions,
 		total_results: @total_results,
-		total_ids: @array_of_ids.count,
+		total_ids: @ids.count,
 		counter: counter
 	}
 end
 
 get '/:id' do
-  @jobId = []
-	@employerName = []
-	@jobTitle = []
-	@minimumSalary, @maximumSalary = [], []
-	@expirationDate = []
-	@jobDescription = []
-	@api_parameters = ["jobId",
-										 "employerName",
-										 "jobTitle",
-										 "minimumSalary",
-										 "maximumSalary",
-										 "expirationDate",
-										 "jobDescription"]
+	parameters = ["jobId",
+							  "employerName",
+							  "jobTitle",
+							  "minimumSalary",
+							  "maximumSalary",
+							  "expirationDate",
+							  "jobDescription"]
 
   url = create_url_desc()
   parsed_response = api_query(url)
- 	prepare_data(parsed_response)
+ 	job_details = prepare_data(parameters, parsed_response)
 
-  erb :job_description, locals: {
-  	jobId: @jobId,
-		employerName: @employerName,
-		jobTitle: @jobTitle,
-		minimumSalary: @minimumSalary,
-		maximumSalary: @maximumSalary,
-		expirationDate: @expirationDate,
-		jobDescription: @jobDescription
+  erb :job_details, locals: {
+  	job_details: job_details
 	}
 end
-
 # description query
 def create_url_desc
 	url = "http://www.reed.co.uk/api/1.0/jobs/" + params[:id]
 	url 
 end
-def prepare_data(parsed_response)
-	@api_parameters.each do |parameter|
-    instance_variable_get("@#{parameter}") << parsed_response[parameter]
+def prepare_data(parameters, parsed_response)
+	details = []
+	parameters.each do |parameter|
+    details << parsed_response[parameter]
   end
+  details
 end
 
 # shared methods
@@ -140,12 +129,12 @@ def update_local_temp_array
 end
 def update_array_of_ids
   @local_temp_array.each do |result|
-    @array_of_ids << result['jobId']
+    @ids << result['jobId']
   end
-  @array_of_ids.uniq! 
+  @ids.uniq! 
 end
 def check_number_of_results
-  while (@array_of_ids.count < @total_results - 10) # do not know why (error in the api?)
+  while (@ids.count < @total_results - 10) # do not know why (error in the api?)
     add_new_jobs()
     update_array_of_ids()
     adjust_url()
@@ -155,16 +144,16 @@ def check_number_of_results
 end
 def add_new_jobs
 	@local_temp_array.each do |result|
-    unless @array_of_ids.include?(result['jobId'])
+    unless @ids.include?(result['jobId'])
       @local_result_hash << result
     end
   end
 end
 def adjust_url
 	@page_counter += 100
-  if @array_of_ids.count < 200
+  if @ids.count < 200
   	@url << "&resultsToSkip="
-  elsif @array_of_ids.count < 1000
+  elsif @ids.count < 1000
     @url = @url[0..-4] 
   else
     @url = @url[0..-5] 
