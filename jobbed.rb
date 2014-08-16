@@ -2,6 +2,8 @@ require 'sinatra'
 require 'net/http'
 require 'json'
 
+require './helpers/helpers'
+
 set :port, 8600
 set :static, true
 set :public_folder, "static"

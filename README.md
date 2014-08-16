@@ -56,7 +56,7 @@ To do/fix:
 - create error pages (404, etc.)
 - divide main file into classes
 - format data returned by Reed Details API (remove [ and ])
-- wire index.erb to job_description.erb
+- add 'back' link to details page
 
 In progress:
 - simplify methods
@@ -72,6 +72,9 @@ Done:
 - check if user inputs more than one word
 	- format spaces into '-'
 - query Reed Details API
+- wire index.erb to job_description.erb
+- add helpers.rb
+	- add link_to helper
 
 
 
