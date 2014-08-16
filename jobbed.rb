@@ -10,7 +10,7 @@ set :public_folder, "static"
 set :views, "views"
 
 get '/' do
-  erb :input_page
+  erb :input
 end
 
 post '/' do
@@ -45,7 +45,7 @@ post '/' do
 # - Add each separate id to the relevant array
 	create_data_arrays()
 
-	erb :index, locals: {
+	erb :search_results, locals: {
 
 		jobIds: @jobIds,
 		employerNames: @employerNames,
