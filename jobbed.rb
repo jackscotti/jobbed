@@ -151,7 +151,7 @@ def add_new_jobs
 end
 def adjust_url
 	@page_counter += 100
-  if @ids.count < 200
+  if @ids.count <= 100
   	@url << "&resultsToSkip="
   elsif @ids.count < 1000
     @url = @url[0..-4] 
