@@ -33,7 +33,7 @@ post '/' do
 										 "expirationDate",
 										 "jobDescription"]
 
-	@url = create_url(format_user_input())
+	@url = create_url(format_user_input(params[:keywords],params[:location]))
 	@first_hash_result_from_api = api_query(@url)
 
 # - count total results from api
@@ -41,7 +41,7 @@ post '/' do
 # - update local array
   update_local_temp_array()
 # - check the number of results, update if needed
-  check_number_of_results() # to be refactored into more specific methods
+  check_number_of_results() 
 # - Add each separate id to the relevant array
 	create_data_arrays()
 
@@ -69,7 +69,7 @@ get '/:id' do
 							  "expirationDate",
 							  "jobDescription"]
 
-  url = create_url_desc()
+  url = create_url_desc(params[:id])
   parsed_response = api_query(url)
  	job_details = prepare_data(parameters, parsed_response)
 
@@ -78,8 +78,8 @@ get '/:id' do
 	}
 end
 # description query
-def create_url_desc
-	url = "http://www.reed.co.uk/api/1.0/jobs/" + params[:id]
+def create_url_desc(id)
+	url = "http://www.reed.co.uk/api/1.0/jobs/" + id
 	url 
 end
 def prepare_data(parameters, parsed_response)
@@ -109,16 +109,15 @@ def remove_spaces(input)
   input = input.split(" ").join("+");
   input
 end
-def format_user_input()
-	keywords = remove_spaces(params[:keywords])
-	location = remove_spaces(params[:location])
+def format_user_input(keywords,location)
+	keywords = remove_spaces(keywords)
+	location = remove_spaces(location)
 	return keywords, location
 end
 def create_url(input)
 	keywords, location = input
 	url = "http://www.reed.co.uk/api/1.0/search?"
-	url << "keywords=" << keywords
-	url << "&locationName=" << location
+	url << "keywords=" << keywords << "&locationName=" << location
 	url
 end
 def count_total_results
